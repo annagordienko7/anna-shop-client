@@ -8,8 +8,8 @@ import OrderHistory from './components/Orders/OrderHistory';
 import Cart from './components/Cart/Cart';
 import AdminPanel from './components/Profile/AdminPanel';
 
-//const API_URL = 'http://localhost:3001';
-const API_URL = 'https://anna-shop-api.onrender.com';
+const API_URL = 'http://localhost:3001';
+//const API_URL = 'https://anna-shop-api.onrender.com';
 
 
 const getHeaders = (userId) => ({
@@ -69,19 +69,40 @@ function App() {
     e.preventDefault();
     try {
       if (isRegistering) {
+        // Шаг 1 ТЗ: Регистрация нового пользователя
         const res = await axios.post(`${API_URL}/users`, { user: formData });
-        alert(res.data.message);
-        setIsRegistering(false);
+        
+        if (res.data && res.data.user) {
+          showToast('Регистрация прошла успешно! Теперь вы можете войти.', 'success');
+          setIsRegistering(false);
+        }
       } else {
-        const res = await axios.post(`${API_URL}/users/sign_in`, { user: { email: formData.email, password: formData.password } });
-        setUser(res.data.user);
-        setView('main'); // При логине всегда открываем главную
-        //alert(`Добро пожаловать, ${res.data.user.first_name}!`);
+        // Шаг 1 ТЗ: Вход (Логин) пользователя
+        const res = await axios.post(`${API_URL}/users/sign_in`, { 
+          user: { email: formData.email, password: formData.password } 
+        });
+        
+        if (res.data && res.data.user) {
+          setUser(res.data.user);
+          setView('main'); // Открываем главную страницу магазина
+          showToast(`Добро пожаловать, ${res.data.user.first_name}!`, 'success');
+        }
       }
     } catch (err) {
-      alert('Ошибка авторизации или заполнения полей');
+      // 🧠 Вытаскиваем точную причину ошибки из Rails бэкенда
+      const railsErrors = err.response?.data?.errors;
+      const railsMessage = err.response?.data?.error || err.response?.data?.message;
+      
+      if (railsErrors && Array.isArray(railsErrors)) {
+        showToast(`Ошибка базы данных: ${railsErrors.join(', ')}`, 'error');
+      } else if (railsMessage) {
+        showToast(railsMessage, 'error');
+      } else {
+        showToast('Проблема с подключением к бэкенду Render. Подождите 1 минуту.', 'error');
+      }
     }
   };
+
 
   const addToCart = (item) => {
     const qty = parseInt(quantities[item.id]) || 1;
