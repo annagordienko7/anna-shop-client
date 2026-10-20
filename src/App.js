@@ -8,7 +8,9 @@ import OrderHistory from './components/Orders/OrderHistory';
 import Cart from './components/Cart/Cart';
 import AdminPanel from './components/Profile/AdminPanel';
 
-const API_URL = 'http://localhost:3001';
+//const API_URL = 'http://localhost:3001';
+const API_URL = 'https://anna-shop-api.onrender.com';
+
 
 const getHeaders = (userId) => ({
   headers: { 'User-Id': userId, 'Content-Type': 'application/json' }
